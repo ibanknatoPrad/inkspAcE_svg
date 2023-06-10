@@ -85,10 +85,17 @@ inkscape:windows:x64: &windows_job
     # Windows runner is restricted to "inkscape" and "ede123" namespaces; only generate pipelines for those
     - if: '$CI_PROJECT_NAMESPACE == "inkscape"'
     - if: '$CI_PROJECT_NAMESPACE == "ede123"'
+  cache:
+    key: "cache-windows"
+    paths:
+      - /c/ccache
   variables:
     PACMAN_OPTIONS: "--needed --noconfirm"
     MSYSTEM: MINGW64
+    CCACHE_DIR: /c/ccache
+    CCACHE_MAXSIZE: "2.0G"
   script:
     - choco install msys2 --params "/InstallDir:C:\msys64" -y
-    - C:/msys64/msys2_shell.cmd -defterm -no-start -mingw64 -here -c "pacman -Syu"
-    - C:/msys64/msys2_shell.cmd -defterm -no-start -mingw64 -here -c "curl https://gitlab.com/inkscape/inkscape/-/raw/master/buildtools/msys2installdeps.sh | bash"
+    - C:/msys64/msys2_shell.cmd -defterm -no-start -mingw64 -here -c "bash buildtools/msys2installdeps.sh"
+    - C:/msys64/msys2_shell.cmd -defterm -no-start -mingw64 -here -c "cmake -Bbuild -G Ninja -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
+    - C:/msys64/msys2_shell.cmd -defterm -no-start -mingw64 -here -c "ninja -C build"
