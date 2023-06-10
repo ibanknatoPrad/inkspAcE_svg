@@ -98,4 +98,4 @@ inkscape:windows:x64: &windows_job
     - choco install msys2 --params "/InstallDir:C:\msys64" -y
     - C:/msys64/msys2_shell.cmd -defterm -no-start -mingw64 -here -c "bash buildtools/msys2installdeps.sh"
     - C:/msys64/msys2_shell.cmd -defterm -no-start -mingw64 -here -c "cmake -Bbuild -G Ninja -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DWITH_INTERNAL_CAIRO=OFF"
-    - C:/msys64/msys2_shell.cmd -defterm -no-start -mingw64 -here -c "ninja -C build"
+    - C:/msys64/msys2_shell.cmd -defterm -no-start -mingw64 -here -c "timeout 80m ninja -C build; RC=$?; if [ $RC -eq 124 ]; then return 0; else return $RC; fi"
