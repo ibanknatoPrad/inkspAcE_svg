@@ -88,11 +88,11 @@ inkscape:windows:x64: &windows_job
   cache:
     key: "cache-windows"
     paths:
-      - /c/ccache
+      - c:/ccache
   variables:
     PACMAN_OPTIONS: "--needed --noconfirm"
     MSYSTEM: MINGW64
-    CCACHE_DIR: /c/ccache
+    CCACHE_DIR: c:/ccache
     CCACHE_MAXSIZE: "2.0G"
   script:
     - choco install msys2 --params "/InstallDir:C:\msys64" -y
