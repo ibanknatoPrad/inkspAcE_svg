@@ -94,8 +94,11 @@ inkscape:windows:x64: &windows_job
     MSYSTEM: MINGW64
     CCACHE_DIR: c:/ccache
     CCACHE_MAXSIZE: "2.0G"
+    WINDEPS_RELEASE_ARCHIVE: msys64.7z
+    WINDEPS_RELEASE_TAG: r230611.1
+    WINDEPS_RELEASE_URL: https://gitlab.com/api/v4/projects/46763286/packages/generic/windeps/$WINDEPS_RELEASE_TAG/$WINDEPS_RELEASE_ARCHIVE
   script:
-    - choco install msys2 --params "/InstallDir:C:\msys64" -y
-    - C:/msys64/msys2_shell.cmd -defterm -no-start -mingw64 -here -c "bash buildtools/msys2installdeps.sh"
+    - wget.exe --quiet --no-check-certificate $WINDEPS_RELEASE_URL
+    - 7z x -oC:/ $WINDEPS_RELEASE_ARCHIVE
     - C:/msys64/msys2_shell.cmd -defterm -no-start -mingw64 -here -c "cmake -Bbuild -G Ninja -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DWITH_INTERNAL_CAIRO=OFF"
-    - C:/msys64/msys2_shell.cmd -defterm -no-start -mingw64 -here -c "timeout 80m ninja -C build; RC=$?; if [ $RC -eq 124 ]; then return 0; else return $RC; fi"
+    - C:/msys64/msys2_shell.cmd -defterm -no-start -mingw64 -here -c "timeout -k 20 80m ninja -C build; RC=$?; if [ $RC -eq 124 ] || [ $RC -eq 137 ]; then return 0; else return $RC; fi"
