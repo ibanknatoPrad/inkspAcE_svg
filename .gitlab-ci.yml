@@ -89,12 +89,12 @@ inkscape:windows:x64: &windows_job
   cache:
     key: "cache-windows"
     paths:
-      - build/ccache
+      - ccache
     when: always
   variables:
     PACMAN_OPTIONS: "--needed --noconfirm"
     MSYSTEM: MINGW64
-    CCACHE_DIR: $CI_PROJECT_DIR/build/ccache
+    CCACHE_DIR: $CI_PROJECT_DIR/ccache
     CCACHE_MAXSIZE: "2.0G"
     WINDEPS_RELEASE_ARCHIVE: msys64.7z
     WINDEPS_RELEASE_TAG: r230611.1
@@ -104,3 +104,7 @@ inkscape:windows:x64: &windows_job
     - 7z x -oC:/ $WINDEPS_RELEASE_ARCHIVE
     - C:/msys64/msys2_shell.cmd -defterm -no-start -mingw64 -here -c "cmake -Bbuild -G Ninja -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DWITH_INTERNAL_CAIRO=OFF"
     - C:/msys64/msys2_shell.cmd -defterm -no-start -mingw64 -here -c "timeout -k 10s 70m ninja -C build"
+    - 7z a build.7z build
+  artifacts:
+    paths:
+      - build.7z
