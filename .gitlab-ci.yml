@@ -85,10 +85,12 @@ inkscape:windows:x64: &windows_job
     # Windows runner is restricted to "inkscape" and "ede123" namespaces; only generate pipelines for those
     - if: '$CI_PROJECT_NAMESPACE == "inkscape"'
     - if: '$CI_PROJECT_NAMESPACE == "ede123"'
+  retry: 2
   cache:
     key: "cache-windows"
     paths:
       - build/ccache
+    when: always
   variables:
     PACMAN_OPTIONS: "--needed --noconfirm"
     MSYSTEM: MINGW64
@@ -101,4 +103,4 @@ inkscape:windows:x64: &windows_job
     - wget.exe --quiet --no-check-certificate $WINDEPS_RELEASE_URL
     - 7z x -oC:/ $WINDEPS_RELEASE_ARCHIVE
     - C:/msys64/msys2_shell.cmd -defterm -no-start -mingw64 -here -c "cmake -Bbuild -G Ninja -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DWITH_INTERNAL_CAIRO=OFF"
-    - C:/msys64/msys2_shell.cmd -defterm -no-start -mingw64 -here -c "timeout -k 10s 60m ninja -C build; echo "rc=$?"; exit 0"
+    - C:/msys64/msys2_shell.cmd -defterm -no-start -mingw64 -here -c "timeout -k 10s 70m ninja -C build"
