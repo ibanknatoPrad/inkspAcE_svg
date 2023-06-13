@@ -1,17 +1,3 @@
-# Dependencies are managed in the Dockerfile in the inkscape-ci-docker
-# Git repository. Change them there, wait a bit, and then we'll use
-# the new ones here in these builds.
-image: registry.gitlab.com/inkscape/inkscape-ci-docker/master
-
-
-# This file is structured in four parts:
-# I) definitions
-# II) build jobs
-# III) checks that are run on merge requests
-# IV) building inkscape.gitlab.io/inkscape (doc and scan)
-#
-
-
 #######################
 #                     #
 #     Definitions     #
@@ -21,8 +7,6 @@ image: registry.gitlab.com/inkscape/inkscape-ci-docker/master
 # all jobs are safe to interrupt
 default:
   interruptible: true
-  artifacts:
-    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
   timeout: 3h
 
 
@@ -31,57 +15,12 @@ variables:
   GIT_DEPTH: "10"
   GIT_SUBMODULE_STRATEGY: recursive
 
-#reusable templates
-.ccache_init: &ccache_init
-  before_script:
-    - mkdir -p ccache
-    - export CCACHE_BASEDIR=${PWD}
-    - export CCACHE_DIR=${PWD}/ccache
-
-.cmake: &cmake
-- mkdir -p build/conf
-- cd build
-- cmake .. -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX:PATH=$PWD/install_dir/ -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-
-# basic workflow setup:
-# - run pipelines for all branches without an open MR
-# - run MR pipeline only as soon as an MR is opened
-workflow:
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
-      when: never
-    - if: '$CI_COMMIT_BRANCH'
-
-.run_MR: &run_for_MR
-  if: '$CI_MERGE_REQUEST_ID'
-
-.run_no_MR: &do_not_run_for_MR
-  if: '$CI_MERGE_REQUEST_ID'
-  when: never
-
-.run_no_schedules: &do_not_run_for_schedules
-  if: '$CI_PIPELINE_SOURCE == "schedule"'
-  when: never
-
-.run_otherwise: &run_otherwise
-  when: on_success
-
-
-#######################
-#                     #
-#  Building inkscape  #
-#                     #
-#######################
-# Linux, Appimage, macOS, Windows.
 
 
 inkscape:windows:x64: &windows_job
   stage: build
   tags:
     - shared-windows
-  rules:
-    - *do_not_run_for_schedules
   retry: 2
   cache:
     key: "cache-windows"
@@ -110,8 +49,6 @@ test:windows:x64:
   stage: test
   tags:
     - shared-windows
-  rules:
-    - *do_not_run_for_schedules
   dependencies:
     - inkscape:windows:x64
   needs: ["inkscape:windows:x64"]
